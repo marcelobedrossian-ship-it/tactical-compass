@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="screen-orientation" content="any">
 <title>Tactical Compass</title>
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
@@ -331,13 +332,13 @@ html, body {
   flex: 0 0 auto;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 8px 14px 0;
+  padding: 4px 14px 0;
 }
-.tac-lbl { font-family:var(--M); font-size:10px; letter-spacing:6px; color:var(--muted); margin-bottom:-6px; }
+.tac-lbl { font-family:var(--M); font-size:10px; letter-spacing:6px; color:var(--muted); margin-bottom:-4px; }
 #tac-heading {
   font-family: var(--F);
-  font-size: clamp(110px, 36vw, 200px);
-  line-height: .88; letter-spacing: 3px;
+  font-size: clamp(110px, 38vw, 210px);
+  line-height: .86; letter-spacing: 3px;
   text-shadow: 0 0 60px rgba(255,255,255,.06);
 }
 
@@ -347,15 +348,16 @@ html, body {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   min-height: 0; gap: 2px;
+  padding-bottom: 4px;
 }
 .shift-row { display:flex; align-items:center; gap:10px; }
-#shift-arrow { font-size:clamp(32px,10vw,48px); color:var(--muted); transition:color .3s; }
+#shift-arrow { font-size:clamp(36px,11vw,52px); color:var(--muted); transition:color .3s; }
 #shift-num {
   font-family:var(--F);
-  font-size:clamp(60px,18vw,90px);
+  font-size:clamp(70px,20vw,100px);
   line-height:1; color:var(--muted); transition:color .3s;
 }
-.shift-deg { font-family:var(--M); font-size:18px; color:var(--muted); }
+.shift-deg { font-family:var(--M); font-size:20px; color:var(--muted); }
 .shift-sub { font-family:var(--M); font-size:10px; color:var(--muted); letter-spacing:4px; margin-top:2px; }
 
 /* Speed row */
@@ -931,13 +933,38 @@ function updateUI(){
     let d=Math.round(S.hdg-ref);
     if(d>180)d-=360; if(d<-180)d+=360;
     const sn=document.getElementById(numId), sa=document.getElementById(arrId);
-    if(sn) { sn.textContent=Math.abs(d); sn.style.color=d>0?'var(--green)':d<0?'var(--red)':'#fff'; }
-    if(sa) { sa.textContent=d>0?'↗':d<0?'↙':'→'; sa.style.color=d>0?'var(--green)':d<0?'var(--red)':'#fff'; }
+
+    /*
+      SHIFT CONVENTION:
+      d = current heading - reference heading
+      PORT tack:  viento rota derecha (d>0) → NEGADO (headed) → ROJO
+                  viento rota izquierda (d<0) → PRESTADO (lifted) → VERDE
+      STBD tack:  viento rota izquierda (d<0) → NEGADO (headed) → ROJO
+                  viento rota derecha (d>0) → PRESTADO (lifted) → VERDE
+    */
+    let isLifted, isHeaded;
+    if(S.active==='port'){
+      isHeaded = d > 0;   // viento fue a la derecha → negado en babor
+      isLifted  = d < 0;  // viento fue a la izquierda → prestado en babor
+    } else {
+      isHeaded = d < 0;   // viento fue a la izquierda → negado en estribor
+      isLifted  = d > 0;  // viento fue a la derecha → prestado en estribor
+    }
+
+    const col = isLifted ? 'var(--green)' : isHeaded ? 'var(--red)' : '#fff';
+    const arr = isLifted ? '↗' : isHeaded ? '↙' : '→';
+
+    if(sn){ sn.textContent=Math.abs(d); sn.style.color=col; }
+    if(sa){ sa.textContent=arr; sa.style.color=col; }
+
     const pSub=document.getElementById(portSubId), sSub=document.getElementById(stbdSubId);
-    if(pSub&&S.active==='port') pSub.textContent=d>0?'LIFTED':d<0?'HEADED':'EVEN';
-    if(sSub&&S.active==='stbd') sSub.textContent=d<0?'LIFTED':d>0?'HEADED':'EVEN';
-    const portFav=S.portRef!==null&&d<0&&S.active!=='port';
-    const stbdFav=S.stbdRef!==null&&d>0&&S.active!=='stbd';
+    const stateLabel = isLifted ? 'PRESTADO' : isHeaded ? 'NEGADO' : 'IGUAL';
+    if(pSub&&S.active==='port') pSub.textContent=stateLabel;
+    if(sSub&&S.active==='stbd') sSub.textContent=stateLabel;
+
+    // Favored: la amura contraria está prestada si el shift favorece cruzar
+    const portFav = S.portRef!==null && S.active!=='port' && d<0;  // prestado en babor
+    const stbdFav = S.stbdRef!==null && S.active!=='stbd' && d>0;  // prestado en estribor
     const pc=document.getElementById(portCardId), sc=document.getElementById(stbdCardId);
     if(pc) pc.classList.toggle('favored',portFav);
     if(sc) sc.classList.toggle('favored',stbdFav);
@@ -959,6 +986,32 @@ setInterval(()=>{
 
 startGPS();
 updateUI();
+
+// ── WAKE LOCK (pantalla siempre encendida) ──────────
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      console.log('Wake lock active');
+    }
+  } catch(e) { console.log('Wake lock error:', e); }
+}
+// Re-acquire on visibility change (iOS releases it when tab goes background)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+requestWakeLock();
+
+// ── SCREEN ORIENTATION (allow landscape on tablet) ──
+async function unlockOrientation() {
+  try {
+    if (screen.orientation && screen.orientation.unlock) {
+      await screen.orientation.unlock();
+    }
+  } catch(e) {}
+}
+unlockOrientation();
 
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

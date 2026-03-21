@@ -1,4 +1,4 @@
-const CACHE = 'tactical-compass-v1';
+const CACHE = 'tactical-compass-v7';
 const ASSETS = [
   './',
   './index.html',
