@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="screen-orientation" content="any">
 <title>Tactical Compass</title>
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
@@ -16,1018 +15,886 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap');
 
 :root {
-  --bg:     #000000;
-  --red:    #ff2020;
-  --green:  #00e676;
-  --yellow: #ffd600;
-  --orange: #ff8c00;
-  --white:  #ffffff;
-  --muted:  #666666;
+  --red:   #ff2020;
+  --green: #00e676;
+  --yel:   #ffd600;
+  --ora:   #ff8c00;
+  --dim:   #1c1c1c;
+  --mut:   #444;
   --F: 'Bebas Neue', sans-serif;
   --M: 'Share Tech Mono', monospace;
 }
 
-* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+* { box-sizing:border-box; margin:0; padding:0;
+    -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 
 html, body {
-  background: #000;
-  color: var(--white);
-  height: 100dvh;
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-  font-family: var(--F);
+  background:#000; color:#fff;
+  height:100dvh; overflow:hidden;
+  position:fixed; width:100%;
+  font-family:var(--F);
 }
 
-/* ══ SEMAPHORE BG ══════════════════════════════════ */
-#sem-bg {
-  position: fixed; inset: 0;
-  pointer-events: none; z-index: 2;
-  transition: background 0.4s, opacity 0.4s;
-  opacity: 0;
+/* ══ SEMAPHORE ══════════════════════════════════ */
+#sem {
+  position:fixed; inset:0; z-index:2;
+  pointer-events:none; opacity:0;
+  transition:background .4s, opacity .4s;
 }
 
-/* ══ SCREENS ════════════════════════════════════════ */
-.screen {
-  position: fixed; inset: 0;
-  display: flex; flex-direction: column;
-  z-index: 3;
-  background: transparent;
-  transition: transform 0.3s cubic-bezier(0.22,1,0.36,1);
+/* ══ SCREENS ════════════════════════════════════ */
+.scr {
+  position:fixed; inset:0;
+  display:flex; flex-direction:column;
+  z-index:3; background:transparent;
+  transition:transform .28s cubic-bezier(.22,1,.36,1);
 }
-.screen.off { transform: translateX(-100%); pointer-events: none; }
-#s2 { transform: translateX(100%); }
-#s2:not(.off) { transform: translateX(0); }
+.scr.off { transform:translateX(-100%); pointer-events:none; }
+#s2 { transform:translateX(100%); }
+#s2:not(.off) { transform:translateX(0); }
 
-/* ══ HEADER — compact, always visible ═════════════ */
+/* ══ SHARED MINI-HEADER ════════════════════════ */
 .hdr {
-  flex: 0 0 44px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding: 0 10px;
-  background: #000;
-  border-bottom: 2px solid #1a1a1a;
-  gap: 6px;
+  flex:0 0 38px;
+  display:grid; grid-template-columns:1fr auto 1fr;
+  align-items:center; padding:0 8px;
+  background:#000; border-bottom:1px solid var(--dim);
 }
-.gps-badge {
-  display: flex; align-items: center; gap: 5px;
-  font-family: var(--M); font-size: 10px; color: var(--muted); letter-spacing: 1px;
+.gps {
+  display:flex; align-items:center; gap:5px;
+  font-family:var(--M); font-size:10px; color:var(--mut);
 }
-.gps-dot { width:7px; height:7px; border-radius:50%; background:var(--green); animation:blink 2s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
-.hdr-title { font-size:13px; letter-spacing:5px; color:#333; text-align:center; }
-.hdr-btns  { display:flex; gap:6px; justify-content:flex-end; }
+.gdot {
+  width:7px; height:7px; border-radius:50%;
+  background:var(--green); animation:blink 2s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+.htit { font-size:11px; letter-spacing:5px; color:#222; text-align:center; }
+.hbtns { display:flex; gap:5px; justify-content:flex-end; }
+.hlbtns { display:flex; gap:5px; }
 
-.hbtn {
-  border-radius:8px; border:2px solid;
-  font-family:var(--F); font-size:16px; letter-spacing:2px;
-  padding:3px 12px; cursor:pointer; background:#000;
+.hb {
+  border-radius:6px; border:1px solid;
+  font-family:var(--F); font-size:15px; letter-spacing:1px;
+  padding:3px 10px; cursor:pointer; background:#000;
+}
+.hb-r { color:var(--ora); border-color:#3a1a00; }
+.hb-r:active { background:#1a0a00; }
+.hb-g { color:var(--green); border-color:#0a3a1a; }
+.hb-g:active { background:#051a0a; }
+.hb-y { color:var(--yel); border-color:#3a3000; }
+.hb-y:active { background:#1a1500; }
+
+/* ══════════════════════════════════════════════
+   PRE-START  (portrait)
+   Row A: status + timer  ~68%
+   Row B: PIN/DIST/RC     ~20%
+   Row C: SOG             ~12%
+══════════════════════════════════════════════ */
+#pre-p {
+  flex:1; display:flex; flex-direction:column; min-height:0;
+}
+
+/* ── ROW A ── */
+.ra {
+  flex:0 0 68%; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:2px 8px; gap:0;
+}
+
+#sw {
+  font-family:var(--F);
+  font-size:clamp(36px,11vw,58px);
+  letter-spacing:3px; color:var(--mut);
+  line-height:1; text-align:center; width:100%;
+  transition:color .3s;
+}
+#sw.ok   { color:var(--green); }
+#sw.ear  { color:var(--red); }
+#sw.lat  { color:var(--ora); }
+#sw.ocs  { color:var(--red); animation:foc .4s infinite; }
+@keyframes foc{0%,100%{opacity:1}50%{opacity:.3}}
+
+#sd {
+  font-family:var(--M);
+  font-size:clamp(9px,2.5vw,13px);
+  color:var(--mut); letter-spacing:1px;
+  text-align:center; line-height:1.3;
+  min-height:1.6em; margin-bottom:2px;
+}
+#el {
+  font-family:var(--M);
+  font-size:clamp(10px,2.8vw,14px);
+  color:#333; letter-spacing:2px; text-align:center;
+}
+
+.tlbl {
+  font-family:var(--M); font-size:9px;
+  letter-spacing:5px; color:#222; margin-bottom:-2px;
+}
+#timer {
+  font-family:var(--F);
+  font-size:clamp(100px,32vw,180px);
+  line-height:.84; letter-spacing:1px;
+  color:#fff; cursor:pointer; user-select:none;
+  transition:color .3s;
+}
+#timer.warn   { color:var(--ora); }
+#timer.danger { color:var(--red); animation:fl .5s infinite; }
+@keyframes fl{0%,100%{opacity:1}50%{opacity:.5}}
+.thint {
+  font-family:var(--M); font-size:8px;
+  color:#1a1a1a; letter-spacing:2px; margin-top:1px;
+}
+
+.trow { display:flex; align-items:center; gap:7px; margin-top:5px; }
+.tadj {
+  width:58px; height:48px;
+  background:#111; border:1px solid #333;
+  color:#fff; font-family:var(--F); font-size:20px;
+  border-radius:9px; cursor:pointer;
+}
+.tadj:active { background:#222; }
+#bst {
+  height:52px; padding:0 28px;
+  background:#00c853; border:none;
+  color:#000; font-family:var(--F);
+  font-size:28px; letter-spacing:3px;
+  border-radius:11px; cursor:pointer;
+  box-shadow:0 0 16px rgba(0,200,83,.4);
+  transition:background .2s, color .2s, box-shadow .2s;
+}
+#bst.run { background:var(--red); color:#fff; box-shadow:0 0 16px rgba(255,32,32,.4); }
+
+/* ── ROW B: marks ── */
+.rb {
+  flex:0 0 20%;
+  display:grid; grid-template-columns:1fr auto 1fr;
+  border-top:1px solid var(--dim);
+}
+.mb {
+  background:#000; border:none;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:2px; cursor:pointer; padding:4px 6px;
+  transition:background .25s;
+}
+.mb.pin { border-right:1px solid var(--dim); }
+.mb.rc  { border-left:1px solid var(--dim); }
+.mb.pin.mk { background:#990000; }
+.mb.rc.mk  { background:#005522; }
+.mb:active { filter:brightness(1.3); }
+
+.mn {
+  font-family:var(--F);
+  font-size:clamp(28px,9vw,48px);
+  letter-spacing:3px; line-height:1;
+  transition:color .2s;
+}
+.mb.pin .mn { color:var(--red); }
+.mb.rc  .mn { color:var(--green); }
+.mb.mk  .mn { color:#fff; }
+.mst {
+  font-family:var(--M); font-size:10px;
+  color:var(--mut); letter-spacing:1px;
+  transition:color .2s;
+}
+.mb.mk .mst { color:rgba(255,255,255,.6); }
+
+.dp {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:#050505; padding:3px 7px;
+  min-width:72px;
+  border-left:1px solid var(--dim);
+  border-right:1px solid var(--dim);
+}
+.dpl { font-family:var(--M); font-size:8px; letter-spacing:3px; color:#222; }
+#dv {
+  font-family:var(--F);
+  font-size:clamp(26px,8vw,42px);
+  line-height:1; color:#333;
+  transition:color .3s; letter-spacing:1px;
+}
+.dpu { font-family:var(--M); font-size:9px; color:#222; letter-spacing:2px; }
+#ds { font-family:var(--M); font-size:8px; color:#222; text-align:center; }
+
+/* ── ROW C: SOG ── */
+.rc {
+  flex:1;
+  display:flex; align-items:center; justify-content:center;
+  gap:8px; border-top:1px solid var(--dim);
+  background:#050505;
+}
+.sl { font-family:var(--M); font-size:10px; letter-spacing:4px; color:#2a2a2a; }
+#arr { font-size:16px; color:#2a2a2a; transition:color .3s; }
+#sv {
+  font-family:var(--F);
+  font-size:clamp(24px,7vw,38px);
+  color:var(--green); line-height:1; letter-spacing:2px;
+}
+.su { font-family:var(--M); font-size:10px; color:#2a2a2a; }
+
+/* ══════════════════════════════════════════════
+   PRE-START  (landscape)
+══════════════════════════════════════════════ */
+#pre-l { display:none; flex:1; min-height:0; }
+
+@media (orientation:landscape) {
+  #pre-p { display:none !important; }
+  #pre-l { display:flex !important; }
+  #tac-p { display:none !important; }
+  #tac-l { display:flex !important; }
+}
+
+.ll { /* left col */
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  border-right:1px solid var(--dim); padding:4px 10px; gap:3px;
+}
+.lr { /* right col */
+  flex:1; display:flex; flex-direction:column;
+  padding:4px 8px; gap:4px;
+}
+#timer-l {
+  font-family:var(--F);
+  font-size:clamp(62px,16vw,120px);
+  line-height:.84; letter-spacing:1px;
+  color:#fff; cursor:pointer; user-select:none; transition:color .3s;
+}
+#timer-l.warn   { color:var(--ora); }
+#timer-l.danger { color:var(--red); animation:fl .5s infinite; }
+#sw-l {
+  font-family:var(--F);
+  font-size:clamp(28px,7vw,48px);
+  letter-spacing:3px; color:var(--mut);
+  text-align:center; transition:color .3s;
+}
+.lmarks {
+  flex:1; display:grid; grid-template-columns:1fr auto 1fr;
+  border:1px solid var(--dim); border-radius:7px;
+  overflow:hidden; min-height:0;
+}
+.lmarks .mb.pin { border-right:1px solid var(--dim); }
+.lmarks .mb.rc  { border-left:1px solid var(--dim); }
+
+/* ══════════════════════════════════════════════
+   TACTICAL  (portrait)
+   ┌─────────────┐
+   │   HEADING   │  50%
+   ├──────┬──────┤
+   │ SOG  │SHIFT │  20%
+   ├──────┴──────┤
+   │ PORT │ STBD │  30%
+   └─────────────┘
+══════════════════════════════════════════════ */
+#tac-p { display:flex; flex-direction:column; flex:1; min-height:0; }
+#tac-l { display:none; flex:1; min-height:0; }
+
+/* GO strip */
+#gos {
+  flex:0 0 0; overflow:hidden;
+  background:var(--green);
+  font-family:var(--F); font-size:20px; letter-spacing:8px; color:#000;
+  display:flex; align-items:center; justify-content:center;
+  transition:flex-basis .4s;
+}
+#gos.show { flex:0 0 44px; }
+
+/* ── HEADING 50% ── */
+.th {
+  flex:0 0 50%;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  border-bottom:2px solid var(--dim);
+  padding:0 2px;
+}
+.tlb {
+  font-family:var(--M); font-size:9px;
+  letter-spacing:6px; color:#222;
+  margin-bottom:-6px;
+}
+
+/* THE KEY: font-size uses vw AND vh, take whichever fits */
+#hd {
+  font-family:var(--F);
+  font-size:min(38vw, 26vh);
+  line-height:.84; letter-spacing:2px; color:#fff;
   white-space:nowrap;
 }
-.hbtn-reset { color:var(--orange); border-color:#3d2200; }
-.hbtn-reset:active { background:#1a0e00; }
-.hbtn-go    { color:var(--green);  border-color:#1a4d2a; }
-.hbtn-go:active { background:#0a1f10; }
-.hbtn-back  { color:var(--yellow); border-color:#4d3d00; }
-.hbtn-back:active { background:#1f1800; }
 
-/* ══════════════════════════════════════════════════
-   PRE-START SCREEN
-   75% = timer zone   25% = bottom zone (PIN/RC/SPD)
-══════════════════════════════════════════════════ */
-
-/* ── TOP 75%: timer + semaphore status ── */
-.pre-top {
-  flex: 0 0 75%;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 6px 10px;
-  position: relative;
-  gap: 0;
+/* ── SOG + SHIFT row 20% ── */
+.tmid {
+  flex:0 0 20%;
+  display:grid; grid-template-columns:1fr 1fr;
+  border-bottom:2px solid var(--dim);
 }
 
-/* Semaphore status word — huge background text */
-#status-word {
-  font-family: var(--F);
-  font-size: clamp(42px, 14vw, 72px);
-  letter-spacing: 4px;
-  color: var(--muted);
-  transition: color .3s;
-  line-height: 1;
-  text-align: center;
-  width: 100%;
-  margin-bottom: 2px;
+.tsog {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  border-right:1px solid var(--dim);
+  background:#060606; gap:0;
 }
-#status-word.s-ok    { color: var(--green); }
-#status-word.s-early { color: var(--red); }
-#status-word.s-late  { color: var(--orange); }
-#status-word.s-ocs   { color: var(--red); animation: flash-ocs .4s infinite; }
-@keyframes flash-ocs { 0%,100%{opacity:1} 50%{opacity:.4} }
+.tsog-l { font-family:var(--M); font-size:9px; letter-spacing:4px; color:#2a2a2a; }
+#ts {
+  font-family:var(--F);
+  font-size:min(12vw, 9vh);
+  color:var(--green); line-height:1; letter-spacing:1px;
+}
+.tsog-u { font-family:var(--M); font-size:10px; color:#2a2a2a; }
 
-#status-detail {
-  font-family: var(--M);
-  font-size: clamp(11px, 3vw, 16px);
-  color: var(--muted);
-  letter-spacing: 1px;
-  text-align: center;
-  line-height: 1.4;
-  margin-bottom: 4px;
-  min-height: 2em;
+.tshf {
+  display:flex; align-items:center; justify-content:center;
+  gap:6px;
 }
-
-/* TIMER */
-.timer-lbl { font-family:var(--M); font-size:10px; letter-spacing:5px; color:#333; margin-bottom:-2px; }
-
-#timer {
-  font-family: var(--F);
-  font-size: clamp(90px, 28vw, 160px);
-  line-height: .88;
-  letter-spacing: 2px;
-  color: var(--white);
-  cursor: pointer;
-  user-select: none;
-  transition: color .3s;
-  /* WHITE FILL text for sunlight */
-  -webkit-text-stroke: 0px;
-  text-shadow: none;
+#sha {
+  font-size:min(11vw, 8vh);
+  color:#333; transition:color .3s; line-height:1;
 }
-#timer.warn   { color: var(--orange); }
-#timer.danger { color: var(--red); animation: flash .5s infinite; }
-@keyframes flash { 0%,100%{opacity:1} 50%{opacity:.6} }
-.timer-hint { font-family:var(--M); font-size:9px; color:#222; letter-spacing:2px; margin-top:1px; }
-
-.timer-row {
-  display: flex; align-items: center; gap: 10px;
-  margin-top: 8px;
+#shn {
+  font-family:var(--F);
+  font-size:min(14vw, 10vh);
+  line-height:1; color:#333;
+  transition:color .3s; letter-spacing:1px;
 }
-.tadj {
-  width: 64px; height: 52px;
-  background: #111; border: 2px solid #333;
-  color: var(--white); font-family: var(--F); font-size: 20px;
-  border-radius: 10px; cursor: pointer; letter-spacing: 1px;
-}
-.tadj:active { background: #222; }
-
-#btn-start {
-  height: 56px; padding: 0 32px;
-  background: #00c853; border: none;
-  color: #000; font-family: var(--F);
-  font-size: 30px; letter-spacing: 4px;
-  border-radius: 12px; cursor: pointer;
-  box-shadow: 0 0 20px rgba(0,200,83,.4);
-  transition: background .2s, color .2s, box-shadow .2s;
-}
-#btn-start.running {
-  background: var(--red); color: #fff;
-  box-shadow: 0 0 20px rgba(255,32,32,.4);
-}
-#btn-start:active { opacity:.85; }
-
-/* ETA line */
-#eta-line {
-  font-family: var(--M);
-  font-size: clamp(12px, 3.5vw, 18px);
-  color: #444;
-  letter-spacing: 2px;
-  margin-top: 4px;
-  text-align: center;
-}
-
-/* ── BOTTOM 25%: PIN / DIST / RC / SPD ── */
-.pre-bottom {
-  flex: 0 0 25%;
-  display: flex; flex-direction: column;
-  border-top: 2px solid #1a1a1a;
-  min-height: 0;
-}
-
-/* PIN / DIST / RC row */
-.line-row {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 0;
-  min-height: 0;
-}
-
-.mark-btn {
-  background: #000;
-  border: none;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 2px; cursor: pointer;
-  transition: background .2s;
-  padding: 4px 8px;
-  border-right: 1px solid #1a1a1a;
-}
-.mark-btn:last-child { border-right: none; border-left: 1px solid #1a1a1a; }
-.mark-btn.pin-btn.marked { background: #1a0505; }
-.mark-btn.rc-btn.marked  { background: #051a08; }
-.mark-btn:active { background: #111; }
-
-.mark-name {
-  font-family: var(--F);
-  font-size: clamp(28px, 9vw, 44px);
-  letter-spacing: 3px; line-height: 1;
-}
-.pin-btn .mark-name { color: var(--red); }
-.rc-btn  .mark-name { color: var(--green); }
-.mark-st { font-family:var(--M); font-size:10px; color:var(--muted); letter-spacing:1px; }
-.pin-btn.marked .mark-st { color: var(--red); }
-.rc-btn.marked  .mark-st { color: var(--green); }
-
-/* Distance panel */
-.dist-panel {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  background: #050505;
-  padding: 4px 10px;
-  gap: 0;
-  min-width: 80px;
-  border-left: 1px solid #1a1a1a;
-  border-right: 1px solid #1a1a1a;
-}
-.dp-lbl { font-family:var(--M); font-size:9px; letter-spacing:3px; color:#333; }
-#dist-val {
-  font-family: var(--F);
-  font-size: clamp(28px, 9vw, 44px);
-  line-height: 1; color: #444;
-  transition: color .3s; letter-spacing: 1px;
-}
-#dist-unit { font-family:var(--M); font-size:9px; color:#333; letter-spacing:2px; }
-#dist-side { font-family:var(--M); font-size:9px; color:#333; letter-spacing:1px; text-align:center; }
-
-/* Speed row */
-.spd-row {
-  flex: 0 0 auto;
-  display: flex; align-items: center; justify-content: center;
-  gap: 8px;
-  height: 38px;
-  border-top: 2px solid #1a1a1a;
-  background: #000;
-}
-.spd-lbl { font-family:var(--M); font-size:10px; letter-spacing:4px; color:#333; }
-#approach-arrow { font-size:18px; color:#333; transition:color .3s; }
-#speed-val {
-  font-family: var(--F);
-  font-size: clamp(24px, 7vw, 38px);
-  color: var(--green); line-height:1; letter-spacing:2px;
-}
-.spd-unit { font-family:var(--M); font-size:10px; color:#333; }
-
-/* ══════════════════════════════════════════════════
-   PRE-START LANDSCAPE
-══════════════════════════════════════════════════ */
-@media (orientation: landscape) {
-  .pre-top { flex: 0 0 100%; flex-direction: row; padding: 6px 10px; gap: 10px; }
-  .pre-bottom { display: none; }
-
-  .ls-pre-wrap {
-    display: flex !important;
-    flex: 1; min-height: 0;
-  }
-
-  /* left: timer */
-  .ls-pre-left {
-    flex: 1;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    border-right: 2px solid #1a1a1a;
-    padding: 6px 14px;
-    gap: 4px;
-  }
-  /* right: status + marks + speed */
-  .ls-pre-right {
-    flex: 1;
-    display: flex; flex-direction: column;
-    padding: 6px 10px;
-    gap: 6px;
-  }
-  .ls-pre-marks {
-    flex: 1;
-    display: grid; grid-template-columns: 1fr auto 1fr;
-    min-height: 0;
-    border: 2px solid #1a1a1a;
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .ls-pre-marks .mark-btn { border-right: 1px solid #1a1a1a; }
-  .ls-pre-marks .mark-btn:last-child { border-right: none; border-left: 1px solid #1a1a1a; }
-}
-.ls-pre-wrap { display: none; }
-
-/* ══════════════════════════════════════════════════
-   TACTICAL SCREEN
-   Rumbo 40% | SOG 15% | SHIFT 15% | PORT/STBD 30%
-══════════════════════════════════════════════════ */
-#s2 .hdr { background: #000; }
-
-#go-strip {
-  flex: 0 0 0; overflow: hidden;
-  background: var(--green);
-  font-family: var(--F); font-size: 22px; letter-spacing: 8px; color: #000;
-  display: flex; align-items: center; justify-content: center;
-  transition: flex-basis .4s;
-}
-#go-strip.show { flex: 0 0 48px; }
-
-/* ── HEADING 40% ── */
-.tac-hdg {
-  flex: 0 0 40%;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 0 6px;
-  border-bottom: 2px solid #1a1a1a;
-}
-.tac-lbl {
-  font-family: var(--M); font-size: 10px;
-  letter-spacing: 6px; color: #333;
-  margin-bottom: -4px;
-}
-#tac-heading {
-  font-family: var(--F);
-  font-size: clamp(100px, 32vw, 200px);
-  line-height: .86; letter-spacing: 3px;
-  color: var(--white);
-}
-
-/* ── SOG 15% ── */
-.tac-sog {
-  flex: 0 0 15%;
-  display: flex; align-items: center; justify-content: center;
-  gap: 10px;
-  border-bottom: 2px solid #1a1a1a;
-  background: #050505;
-}
-.sog-lbl { font-family:var(--M); font-size:10px; letter-spacing:4px; color:#333; }
-#tac-spd {
-  font-family: var(--F);
-  font-size: clamp(42px, 13vw, 72px);
-  color: var(--green); line-height:1; letter-spacing:2px;
-}
-.sog-unit { font-family:var(--M); font-size:12px; color:#333; }
-
-/* ── SHIFT 15% ── */
-.tac-shift {
-  flex: 0 0 15%;
-  display: flex; align-items: center; justify-content: center;
-  gap: 14px;
-  border-bottom: 2px solid #1a1a1a;
-}
-/* Big arrow — UP or DOWN */
-#shift-arrow {
-  font-size: clamp(36px, 12vw, 60px);
-  color: #333;
-  transition: color .3s;
-  line-height: 1;
-}
-#shift-num {
-  font-family: var(--F);
-  font-size: clamp(52px, 16vw, 82px);
-  line-height: 1; color: #333;
-  transition: color .3s;
-  letter-spacing: 1px;
-}
-.shift-deg { font-family:var(--M); font-size:14px; color:#333; align-self:flex-end; margin-bottom:6px; }
-.shift-sub { font-family:var(--M); font-size:10px; color:#333; letter-spacing:4px; }
-.shift-label-col { display:flex; flex-direction:column; align-items:center; gap:2px; }
+.shm { display:flex; flex-direction:column; align-items:center; gap:1px; }
+.shd { font-family:var(--M); font-size:11px; color:#333; align-self:flex-end; margin-bottom:4px; }
+.shl { font-family:var(--M); font-size:8px; color:#333; letter-spacing:4px; }
 
 /* ── PORT / STBD 30% ── */
-.tac-sides {
-  flex: 0 0 30%;
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 0;
+.tsides {
+  flex:0 0 30%;
+  display:grid; grid-template-columns:1fr 1fr;
 }
-.side-card {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 2px; cursor: pointer; position: relative;
-  transition: background .2s;
-  border-top: none;
-  padding: 8px;
+.sc {
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:1px; cursor:pointer; position:relative; padding:5px;
+  transition:background .2s;
 }
-.port-card { background: #0f0303; border-right: 1px solid #1a1a1a; }
-.stbd-card { background: #030f05; }
-.port-card.active { background: var(--red); }
-.stbd-card.active { background: var(--green); }
-.side-card.active .side-title,
-.side-card.active .side-hdg,
-.side-card.active .side-sub { color: #000 !important; }
-.port-card:active { background: #2a0808; }
-.stbd-card:active { background: #082a0c; }
+.sc.port { background:#0d0202; border-right:1px solid var(--dim); }
+.sc.stbd { background:#020d03; }
+.sc.port.act { background:var(--red); }
+.sc.stbd.act { background:var(--green); }
+.sc.act .sct, .sc.act .scs { color:#000 !important; }
 
-.fav-badge {
-  position: absolute; top: 4px; right: 6px;
-  background: var(--yellow); color: #000;
-  font-family: var(--M); font-size: 9px; font-weight: 700;
-  padding: 2px 7px; border-radius: 10px; letter-spacing: 1px;
-  opacity: 0; transition: opacity .3s;
+/* white number box */
+.scd {
+  background:#fff; border-radius:5px;
+  padding:1px 8px; display:inline-block;
+  transition:background .2s;
 }
-.side-card.favored .fav-badge { opacity: 1; }
+.sc.act .scd { background:rgba(0,0,0,.18); }
+.sch {
+  font-family:var(--F);
+  font-size:min(11vw, 8vh);
+  color:#000; line-height:1;
+}
+.sc.act .sch { color:#000; }
 
-.side-title {
-  font-family: var(--F);
-  font-size: clamp(14px, 4vw, 22px); letter-spacing: 5px;
-}
-.port-card .side-title { color: var(--red); }
-.stbd-card .side-title { color: var(--green); }
-.side-hdg {
-  font-family: var(--F);
-  font-size: clamp(36px, 11vw, 58px);
-  color: var(--white); line-height: 1;
-}
-.side-sub {
-  font-family: var(--M); font-size: 10px;
-  color: var(--muted); letter-spacing: 2px;
-}
+.sct { font-family:var(--F); font-size:clamp(12px,3.5vw,20px); letter-spacing:5px; }
+.sc.port .sct { color:var(--red); }
+.sc.stbd .sct { color:var(--green); }
+.scs { font-family:var(--M); font-size:9px; color:var(--mut); letter-spacing:2px; }
 
-/* ── TACTICAL LANDSCAPE ── */
-@media (orientation: landscape) {
-  .tac-body-p { display: none !important; }
-  .tac-body-l { display: flex !important; }
+.favb {
+  position:absolute; top:3px; right:4px;
+  background:var(--yel); color:#000;
+  font-family:var(--M); font-size:8px; font-weight:700;
+  padding:2px 5px; border-radius:7px; letter-spacing:1px;
+  opacity:0; transition:opacity .3s;
 }
-.tac-body-p { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.tac-body-l { display: none; flex: 1; min-height: 0; }
+.sc.fav .favb { opacity:1; }
 
-.tac-l-left {
-  flex: 1;
-  display: flex; flex-direction: column;
-  border-right: 2px solid #1a1a1a;
-}
-.tac-l-right {
-  flex: 1;
-  display: flex; flex-direction: column;
-}
+/* ══════════════════════════════════════════════
+   TACTICAL  (landscape)
+   Left: HDG + SOG    Right: SHIFT + SIDES
+══════════════════════════════════════════════ */
+.tll { flex:1; display:flex; flex-direction:column; border-right:2px solid var(--dim); }
+.tlr { flex:1; display:flex; flex-direction:column; }
 
-/* landscape heading */
-.tac-hdg-l {
-  flex: 1;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  border-bottom: 2px solid #1a1a1a;
+.tll-hdg {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  border-bottom:1px solid var(--dim);
 }
-#tac-heading-l {
-  font-family: var(--F);
-  font-size: clamp(80px, 22vw, 150px);
-  line-height: .86; letter-spacing: 3px; color: var(--white);
+#hd-l {
+  font-family:var(--F);
+  font-size:min(26vw, 32vh);
+  line-height:.84; letter-spacing:2px; color:#fff;
+  white-space:nowrap;
 }
-/* landscape sog */
-.tac-sog-l {
-  flex: 0 0 auto;
-  display: flex; align-items: center; justify-content: center;
-  gap: 10px; height: 20%;
-  border-bottom: 2px solid #1a1a1a; background: #050505;
+.tll-sog {
+  flex:0 0 22%; display:flex;
+  align-items:center; justify-content:center;
+  gap:8px; background:#060606;
 }
-#tac-spd-l { font-family:var(--F); font-size:clamp(36px,8vw,60px); color:var(--green); line-height:1; letter-spacing:2px; }
+#ts-l { font-family:var(--F); font-size:min(10vw,9vh); color:var(--green); line-height:1; letter-spacing:1px; }
 
-/* landscape shift */
-.tac-shift-l {
-  flex: 1;
-  display: flex; align-items: center; justify-content: center;
-  gap: 14px; border-bottom: 2px solid #1a1a1a;
+.tlr-shf {
+  flex:1; display:flex;
+  align-items:center; justify-content:center;
+  gap:8px; border-bottom:1px solid var(--dim);
 }
-#shift-arrow-l { font-size:clamp(32px,9vw,54px); color:#333; transition:color .3s; line-height:1; }
-#shift-num-l { font-family:var(--F); font-size:clamp(44px,12vw,70px); line-height:1; color:#333; transition:color .3s; }
+#sha-l { font-size:min(10vw,9vh); color:#333; transition:color .3s; line-height:1; }
+#shn-l { font-family:var(--F); font-size:min(13vw,11vh); line-height:1; color:#333; transition:color .3s; }
 
-/* landscape sides */
-.tac-sides-l {
-  flex: 0 0 36%;
-  display: grid; grid-template-columns: 1fr 1fr;
-}
-.tac-sides-l .side-card { padding: 6px; }
-.tac-sides-l .port-card { border-right: 1px solid #1a1a1a; }
+.tlr-sides { flex:0 0 40%; display:grid; grid-template-columns:1fr 1fr; }
+.tlr-sides .sc.port { border-right:1px solid var(--dim); }
 
-/* ══ COUNTDOWN ══════════════════════════════════════ */
-#go-overlay {
-  position: fixed; inset: 0; background: #000; z-index: 200;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none; transition: opacity .3s;
+/* ══ COUNTDOWN ══════════════════════════════ */
+#cov {
+  position:fixed; inset:0; background:#000; z-index:200;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .3s;
 }
-#go-overlay.visible { opacity: 1; pointer-events: all; }
-#go-num  { font-family:var(--F); font-size:52vw; line-height:1; color:var(--yellow); }
-#go-word { font-family:var(--F); font-size:32vw; letter-spacing:8px; color:var(--green); text-shadow:0 0 80px var(--green); display:none; }
+#cov.vis { opacity:1; pointer-events:all; }
+#cn { font-family:var(--F); font-size:52vw; line-height:1; color:var(--yel); }
+#cg { font-family:var(--F); font-size:32vw; letter-spacing:8px;
+      color:var(--green); text-shadow:0 0 60px var(--green); display:none; }
 </style>
 </head>
 <body>
+<div id="sem"></div>
 
-<div id="sem-bg"></div>
-
-<!-- ══════════ SCREEN 1: PRE-START ══════════ -->
-<div class="screen" id="s1">
-
+<!-- ══ PRE-START ════════════════════════════ -->
+<div class="scr" id="s1">
   <div class="hdr">
-    <div class="gps-badge">
-      <div class="gps-dot"></div>
-      <span id="gps-lbl">INIT</span>
-    </div>
-    <span class="hdr-title">PRE-START</span>
-    <div class="hdr-btns">
-      <button class="hbtn hbtn-reset" onclick="resetAll()">⟳ RESET</button>
-      <button class="hbtn hbtn-go"    onclick="goTac()">TAC →</button>
+    <div class="gps"><div class="gdot"></div><span id="gl">INIT</span></div>
+    <span class="htit">PRE-START</span>
+    <div class="hbtns">
+      <button class="hb hb-r" onclick="resetAll()">⟳ RST</button>
+      <button class="hb hb-g" onclick="goTac()">TAC →</button>
     </div>
   </div>
 
-  <!-- PORTRAIT layout -->
-  <div class="pre-top">
-    <!-- semaphore status -->
-    <div id="status-word">——</div>
-    <div id="status-detail">SET PIN &amp; RC TO CALCULATE</div>
-
-    <!-- timer -->
-    <div class="timer-lbl">COUNTDOWN</div>
-    <div id="timer" onclick="syncTimer()">05:00</div>
-    <div class="timer-hint">↑ TAP = SYNC NEXT MIN</div>
-    <div class="timer-row">
-      <button class="tadj" onclick="adjTime(-60)">−1M</button>
-      <button id="btn-start" onclick="toggleTimer()">START</button>
-      <button class="tadj" onclick="adjTime(+60)">+1M</button>
-    </div>
-    <div id="eta-line"></div>
-  </div>
-
-  <div class="pre-bottom">
-    <div class="line-row">
-      <button class="mark-btn pin-btn" id="btn-pin" onclick="markLine('PIN')">
-        <span class="mark-name">PIN</span>
-        <span class="mark-st" id="pin-st">TAP TO SET</span>
-      </button>
-      <div class="dist-panel">
-        <span class="dp-lbl">DIST</span>
-        <div id="dist-val">--</div>
-        <div id="dist-unit">M</div>
-        <div id="dist-side"></div>
-      </div>
-      <button class="mark-btn rc-btn" id="btn-rc" onclick="markLine('RC')">
-        <span class="mark-name">RC</span>
-        <span class="mark-st" id="rc-st">TAP TO SET</span>
-      </button>
-    </div>
-    <div class="spd-row">
-      <span class="spd-lbl">SOG</span>
-      <span id="approach-arrow">→</span>
-      <span id="speed-val">0.0</span>
-      <span class="spd-unit">KTS</span>
-    </div>
-  </div>
-
-  <!-- LANDSCAPE layout -->
-  <div class="ls-pre-wrap">
-    <div class="ls-pre-left">
-      <div class="timer-lbl">COUNTDOWN</div>
-      <div id="timer-ls" onclick="syncTimer()" style="font-family:var(--F);font-size:clamp(60px,15vw,110px);line-height:.88;letter-spacing:2px;color:var(--white);cursor:pointer;user-select:none;transition:color .3s">05:00</div>
-      <div class="timer-hint">↑ TAP = SYNC</div>
-      <div class="timer-row" style="margin-top:6px">
+  <!-- PORTRAIT -->
+  <div id="pre-p">
+    <div class="ra">
+      <div id="sw">——</div>
+      <div id="sd">SET PIN &amp; RC TO CALCULATE</div>
+      <div id="el"></div>
+      <div class="tlbl">COUNTDOWN</div>
+      <div id="timer" onclick="syncTimer()">05:00</div>
+      <div class="thint">↑ TAP = SYNC</div>
+      <div class="trow">
         <button class="tadj" onclick="adjTime(-60)">−1M</button>
-        <button id="btn-start-ls" onclick="toggleTimer()" style="height:50px;padding:0 28px;background:#00c853;border:none;color:#000;font-family:var(--F);font-size:26px;letter-spacing:4px;border-radius:12px;cursor:pointer;transition:background .2s,color .2s">START</button>
+        <button id="bst" onclick="toggleTimer()">START</button>
         <button class="tadj" onclick="adjTime(+60)">+1M</button>
       </div>
     </div>
-    <div class="ls-pre-right">
-      <div id="status-word-ls" style="font-family:var(--F);font-size:clamp(32px,8vw,52px);letter-spacing:4px;color:var(--muted);text-align:center;transition:color .3s">——</div>
-      <div id="status-detail-ls" style="font-family:var(--M);font-size:11px;color:var(--muted);letter-spacing:1px;text-align:center;line-height:1.4">SET PIN &amp; RC</div>
-      <div id="eta-line-ls" style="font-family:var(--M);font-size:12px;color:#444;letter-spacing:2px;text-align:center"></div>
-      <div class="ls-pre-marks" style="flex:1;display:grid;grid-template-columns:1fr auto 1fr;min-height:0;border:2px solid #1a1a1a;border-radius:10px;overflow:hidden;margin-top:4px">
-        <button class="mark-btn pin-btn" id="btn-pin-ls" onclick="markLine('PIN')">
-          <span class="mark-name">PIN</span>
-          <span class="mark-st" id="pin-st-ls">TAP</span>
-        </button>
-        <div class="dist-panel">
-          <span class="dp-lbl">DIST</span>
-          <div id="dist-val-ls" style="font-family:var(--F);font-size:clamp(24px,6vw,40px);line-height:1;color:#444;transition:color .3s;letter-spacing:1px">--</div>
-          <div style="font-family:var(--M);font-size:9px;color:#333;letter-spacing:2px">M</div>
-          <div id="dist-side-ls" style="font-family:var(--M);font-size:9px;color:#333;letter-spacing:1px;text-align:center"></div>
-        </div>
-        <button class="mark-btn rc-btn" id="btn-rc-ls" onclick="markLine('RC')">
-          <span class="mark-name">RC</span>
-          <span class="mark-st" id="rc-st-ls">TAP</span>
-        </button>
+    <div class="rb">
+      <button class="mb pin" id="bp" onclick="markLine('PIN')">
+        <span class="mn">PIN</span><span class="mst" id="ps">TAP</span>
+      </button>
+      <div class="dp">
+        <span class="dpl">DIST</span>
+        <div id="dv">--</div>
+        <div class="dpu">M</div>
+        <div id="ds"></div>
       </div>
-      <div class="spd-row" style="height:36px;border-top:2px solid #1a1a1a;border-radius:0;margin-top:4px">
-        <span class="spd-lbl">SOG</span>
-        <span id="approach-arrow-ls" style="font-size:16px;color:#333;transition:color .3s">→</span>
-        <span id="speed-val-ls" style="font-family:var(--F);font-size:clamp(22px,6vw,36px);color:var(--green);line-height:1;letter-spacing:2px">0.0</span>
-        <span class="spd-unit">KTS</span>
-      </div>
+      <button class="mb rc" id="br" onclick="markLine('RC')">
+        <span class="mn">RC</span><span class="mst" id="rs">TAP</span>
+      </button>
+    </div>
+    <div class="rc-row rc">
+      <span class="sl">SOG</span>
+      <span id="arr">→</span>
+      <span id="sv">0.0</span>
+      <span class="su">KTS</span>
     </div>
   </div>
 
+  <!-- LANDSCAPE -->
+  <div id="pre-l">
+    <div class="ll">
+      <div class="tlbl">COUNTDOWN</div>
+      <div id="timer-l" onclick="syncTimer()">05:00</div>
+      <div class="thint">↑ TAP = SYNC</div>
+      <div class="trow" style="margin-top:5px">
+        <button class="tadj" onclick="adjTime(-60)">−1M</button>
+        <button id="bst-l" onclick="toggleTimer()"
+          style="height:50px;padding:0 24px;background:#00c853;border:none;
+                 color:#000;font-family:var(--F);font-size:26px;letter-spacing:3px;
+                 border-radius:10px;cursor:pointer;transition:background .2s,color .2s">START</button>
+        <button class="tadj" onclick="adjTime(+60)">+1M</button>
+      </div>
+    </div>
+    <div class="lr">
+      <div id="sw-l" style="font-family:var(--F);font-size:clamp(28px,7vw,46px);
+        letter-spacing:3px;color:var(--mut);text-align:center;transition:color .3s">——</div>
+      <div id="sd-l" style="font-family:var(--M);font-size:10px;color:var(--mut);
+        letter-spacing:1px;text-align:center;line-height:1.3">SET PIN &amp; RC</div>
+      <div id="el-l" style="font-family:var(--M);font-size:11px;color:#333;
+        letter-spacing:2px;text-align:center"></div>
+      <div class="lmarks" style="margin-top:3px">
+        <button class="mb pin" id="bp-l" onclick="markLine('PIN')">
+          <span class="mn">PIN</span><span class="mst" id="ps-l">TAP</span>
+        </button>
+        <div class="dp">
+          <span class="dpl">DIST</span>
+          <div id="dv-l" style="font-family:var(--F);font-size:clamp(22px,5vw,36px);
+            line-height:1;color:#333;transition:color .3s">--</div>
+          <div class="dpu">M</div>
+          <div id="ds-l" style="font-family:var(--M);font-size:8px;color:#222;text-align:center"></div>
+        </div>
+        <button class="mb rc" id="br-l" onclick="markLine('RC')">
+          <span class="mn">RC</span><span class="mst" id="rs-l">TAP</span>
+        </button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;
+        gap:8px;height:34px;border-top:1px solid var(--dim);margin-top:3px">
+        <span class="sl">SOG</span>
+        <span id="arr-l" style="font-size:14px;color:#2a2a2a;transition:color .3s">→</span>
+        <span id="sv-l" style="font-family:var(--F);font-size:clamp(20px,5vw,34px);
+          color:var(--green);line-height:1;letter-spacing:1px">0.0</span>
+        <span class="su">KTS</span>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- ══════════ SCREEN 2: TACTICAL ══════════ -->
-<div class="screen off" id="s2">
-
+<!-- ══ TACTICAL ══════════════════════════════ -->
+<div class="scr off" id="s2">
   <div class="hdr">
-    <div class="hdr-btns" style="justify-content:flex-start">
-      <button class="hbtn hbtn-reset" onclick="resetAll()">⟳ RESET</button>
+    <div class="hlbtns">
+      <button class="hb hb-r" onclick="resetAll()">⟳ RST</button>
     </div>
-    <span class="hdr-title">TACTICAL</span>
-    <div class="hdr-btns">
-      <button class="hbtn hbtn-back" onclick="goPreStart()">← PRE</button>
+    <span class="htit">TACTICAL</span>
+    <div class="hbtns">
+      <button class="hb hb-y" onclick="goPreStart()">← PRE</button>
     </div>
   </div>
 
-  <div id="go-strip">🚩 GO — RACING</div>
+  <div id="gos">🚩 GO — RACING</div>
 
-  <!-- PORTRAIT tactical -->
-  <div class="tac-body-p">
-
-    <div class="tac-hdg">
-      <div class="tac-lbl">HEADING</div>
-      <div id="tac-heading">000°</div>
+  <!-- PORTRAIT -->
+  <div id="tac-p">
+    <div class="th">
+      <div class="tlb">HEADING</div>
+      <div id="hd">000°</div>
     </div>
-
-    <div class="tac-sog">
-      <span class="sog-lbl">SOG</span>
-      <span id="tac-spd">0.0</span>
-      <span class="sog-unit">KTS</span>
-    </div>
-
-    <div class="tac-shift">
-      <span id="shift-arrow">▲</span>
-      <span id="shift-num">--</span>
-      <div class="shift-label-col">
-        <span class="shift-deg">°</span>
-        <span class="shift-sub">SHIFT</span>
+    <div class="tmid">
+      <div class="tsog">
+        <span class="tsog-l">SOG</span>
+        <span id="ts">0.0</span>
+        <span class="tsog-u">KTS</span>
+      </div>
+      <div class="tshf">
+        <span id="sha">▲</span>
+        <span id="shn">--</span>
+        <div class="shm">
+          <span class="shd">°</span>
+          <span class="shl">SHIFT</span>
+        </div>
       </div>
     </div>
-
-    <div class="tac-sides">
-      <div class="side-card port-card" id="card-port" onclick="selectSide('port')">
-        <span class="fav-badge">FAVORED</span>
-        <span class="side-title">PORT</span>
-        <span class="side-hdg" id="val-port">---°</span>
-        <span class="side-sub" id="sub-port">TAP TO SET</span>
+    <div class="tsides">
+      <div class="sc port" id="cp" onclick="selectSide('port')">
+        <span class="favb">FAVORED</span>
+        <span class="sct">PORT</span>
+        <div class="scd"><span class="sch" id="vp">---°</span></div>
+        <span class="scs" id="sbp">TAP TO SET</span>
       </div>
-      <div class="side-card stbd-card" id="card-stbd" onclick="selectSide('stbd')">
-        <span class="fav-badge">FAVORED</span>
-        <span class="side-title">STBD</span>
-        <span class="side-hdg" id="val-stbd">---°</span>
-        <span class="side-sub" id="sub-stbd">TAP TO SET</span>
+      <div class="sc stbd" id="cs" onclick="selectSide('stbd')">
+        <span class="favb">FAVORED</span>
+        <span class="sct">STBD</span>
+        <div class="scd"><span class="sch" id="vs">---°</span></div>
+        <span class="scs" id="sbs">TAP TO SET</span>
       </div>
     </div>
-
   </div>
 
-  <!-- LANDSCAPE tactical -->
-  <div class="tac-body-l">
-
-    <div class="tac-l-left">
-      <div class="tac-hdg-l">
-        <div class="tac-lbl">HEADING</div>
-        <div id="tac-heading-l">000°</div>
+  <!-- LANDSCAPE -->
+  <div id="tac-l">
+    <div class="tll">
+      <div class="tll-hdg">
+        <div class="tlb">HEADING</div>
+        <div id="hd-l">000°</div>
       </div>
-      <div class="tac-sog-l">
-        <span class="sog-lbl">SOG</span>
-        <span id="tac-spd-l">0.0</span>
-        <span class="sog-unit">KTS</span>
+      <div class="tll-sog">
+        <span class="tsog-l">SOG</span>
+        <span id="ts-l">0.0</span>
+        <span class="tsog-u">KTS</span>
       </div>
     </div>
-
-    <div class="tac-l-right">
-      <div class="tac-shift-l">
-        <span id="shift-arrow-l">▲</span>
-        <span id="shift-num-l">--</span>
-        <div class="shift-label-col">
-          <span class="shift-deg">°</span>
-          <span class="shift-sub">SHIFT</span>
+    <div class="tlr">
+      <div class="tlr-shf">
+        <span id="sha-l">▲</span>
+        <span id="shn-l">--</span>
+        <div class="shm">
+          <span class="shd">°</span>
+          <span class="shl">SHIFT</span>
         </div>
       </div>
-      <div class="tac-sides-l">
-        <div class="side-card port-card" id="card-port-l" onclick="selectSide('port')">
-          <span class="fav-badge">FAVORED</span>
-          <span class="side-title">PORT</span>
-          <span class="side-hdg" id="val-port-l">---°</span>
-          <span class="side-sub" id="sub-port-l">TAP TO SET</span>
+      <div class="tlr-sides">
+        <div class="sc port" id="cp-l" onclick="selectSide('port')">
+          <span class="favb">FAVORED</span>
+          <span class="sct">PORT</span>
+          <div class="scd"><span class="sch" id="vp-l">---°</span></div>
+          <span class="scs" id="sbp-l">TAP TO SET</span>
         </div>
-        <div class="side-card stbd-card" id="card-stbd-l" onclick="selectSide('stbd')">
-          <span class="fav-badge">FAVORED</span>
-          <span class="side-title">STBD</span>
-          <span class="side-hdg" id="val-stbd-l">---°</span>
-          <span class="side-sub" id="sub-stbd-l">TAP TO SET</span>
+        <div class="sc stbd" id="cs-l" onclick="selectSide('stbd')">
+          <span class="favb">FAVORED</span>
+          <span class="sct">STBD</span>
+          <div class="scd"><span class="sch" id="vs-l">---°</span></div>
+          <span class="scs" id="sbs-l">TAP TO SET</span>
         </div>
       </div>
     </div>
-
   </div>
-
 </div>
 
 <!-- COUNTDOWN -->
-<div id="go-overlay">
-  <div id="go-num"></div>
-  <div id="go-word">GO</div>
-</div>
+<div id="cov"><div id="cn"></div><div id="cg">GO</div></div>
 
 <script>
-const S = {
-  sec:300, run:false, hdg:45, spd:0,
-  lat:null, lon:null,
-  pinLat:null, pinLon:null, rcLat:null, rcLon:null,
-  pinSet:false, rcSet:false,
-  approachSpd:0,
-  portRef:null, stbdRef:null, active:null,
-  transitioned:false,
-  _sh:45, _sd:65, _sa:0.45
+const S={
+  sec:300,run:false,hdg:45,spd:0,
+  lat:null,lon:null,
+  pLa:null,pLo:null,rLa:null,rLo:null,
+  pinSet:false,rcSet:false,apSpd:0,
+  portRef:null,stbdRef:null,act:null,
+  trans:false,_sh:45,_sd:65,_sa:.45
 };
 
-/* ── GPS ─────────────────────────────────────────── */
-function startGPS() {
-  if (!navigator.geolocation) return;
-  let pL=null,pN=null,pT=null;
+function startGPS(){
+  if(!navigator.geolocation)return;
+  let la=null,lo=null,t=null;
   navigator.geolocation.watchPosition(p=>{
-    const {latitude:la,longitude:lo,heading:h,speed:sp}=p.coords;
-    S.lat=la; S.lon=lo;
-    if(h!=null&&!isNaN(h)) S.hdg=h;
-    if(sp!=null) S.spd=sp*1.94384;
-    if(pL!=null&&S.pinSet&&S.rcSet){
-      const d1=dtl(pL,pN),d2=dtl(la,lo),dt=(p.timestamp-pT)/1000;
-      if(dt>0) S.approachSpd=(d1-d2)/dt;
+    const{latitude:a,longitude:o,heading:h,speed:sp}=p.coords;
+    S.lat=a;S.lon=o;
+    if(h!=null&&!isNaN(h))S.hdg=h;
+    if(sp!=null)S.spd=sp*1.94384;
+    if(la!=null&&S.pinSet&&S.rcSet){
+      const d1=dtl(la,lo),d2=dtl(a,o),dt=(p.timestamp-t)/1000;
+      if(dt>0)S.apSpd=(d1-d2)/dt;
     }
-    pL=la;pN=lo;pT=p.timestamp;
-    document.getElementById('gps-lbl').textContent='LOCKED';
+    la=a;lo=o;t=p.timestamp;
+    $t('gl','LOCKED');
   },null,{enableHighAccuracy:true,maximumAge:500});
 }
 
-/* ── GEOMETRY ───────────────────────────────────── */
 const rd=d=>d*Math.PI/180;
 function dtl(la,lo){
-  if(!S.pinSet||!S.rcSet) return null;
+  if(!S.pinSet||!S.rcSet)return null;
   const R=6371000;
-  const [la1,lo1,la2,lo2,la0,lo0]=[rd(S.pinLat),rd(S.pinLon),rd(S.rcLat),rd(S.rcLon),rd(la),rd(lo)];
-  const d13=2*Math.asin(Math.sqrt(Math.sin((la0-la1)/2)**2+Math.cos(la1)*Math.cos(la0)*Math.sin((lo0-lo1)/2)**2));
-  const b13=Math.atan2(Math.sin(lo0-lo1)*Math.cos(la0),Math.cos(la1)*Math.sin(la0)-Math.sin(la1)*Math.cos(la0)*Math.cos(lo0-lo1));
-  const b12=Math.atan2(Math.sin(lo2-lo1)*Math.cos(la2),Math.cos(la1)*Math.sin(la2)-Math.sin(la1)*Math.cos(la2)*Math.cos(lo2-lo1));
+  const[a1,o1,a2,o2,a0,o0]=[rd(S.pLa),rd(S.pLo),rd(S.rLa),rd(S.rLo),rd(la),rd(lo)];
+  const d13=2*Math.asin(Math.sqrt(Math.sin((a0-a1)/2)**2+Math.cos(a1)*Math.cos(a0)*Math.sin((o0-o1)/2)**2));
+  const b13=Math.atan2(Math.sin(o0-o1)*Math.cos(a0),Math.cos(a1)*Math.sin(a0)-Math.sin(a1)*Math.cos(a0)*Math.cos(o0-o1));
+  const b12=Math.atan2(Math.sin(o2-o1)*Math.cos(a2),Math.cos(a1)*Math.sin(a2)-Math.sin(a1)*Math.cos(a2)*Math.cos(o2-o1));
   return Math.asin(Math.sin(d13)*Math.sin(b13-b12))*R;
 }
 
-/* ── MARKS ──────────────────────────────────────── */
-function markLine(type){
+function markLine(tp){
   const la=S.lat??(-34.5+Math.random()*.002),lo=S.lon??(-58.4+Math.random()*.002);
-  if(type==='PIN'){
-    S.pinSet=true; S.pinLat=la; S.pinLon=lo;
-    ['btn-pin','btn-pin-ls'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('marked');});
-    ['pin-st','pin-st-ls'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=S.lat?'SET ✓':'SIM ✓';});
-  } else {
-    S.rcSet=true; S.rcLat=la; S.rcLon=lo;
-    ['btn-rc','btn-rc-ls'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('marked');});
-    ['rc-st','rc-st-ls'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=S.lat?'SET ✓':'SIM ✓';});
+  if(tp==='PIN'){
+    S.pinSet=true;S.pLa=la;S.pLo=lo;
+    ['bp','bp-l'].forEach(id=>{const e=q(id);if(e)e.classList.add('mk');});
+    ['ps','ps-l'].forEach(id=>$t(id,S.lat?'SET ✓':'SIM ✓'));
+  }else{
+    S.rcSet=true;S.rLa=la;S.rLo=lo;
+    ['br','br-l'].forEach(id=>{const e=q(id);if(e)e.classList.add('mk');});
+    ['rs','rs-l'].forEach(id=>$t(id,S.lat?'SET ✓':'SIM ✓'));
   }
   updateUI();
 }
 
-/* ── TIMER ──────────────────────────────────────── */
 function toggleTimer(){
   S.run=!S.run;
-  const pairs=[['btn-start',false],['btn-start-ls',true]];
-  pairs.forEach(([id,isInline])=>{
-    const b=document.getElementById(id); if(!b) return;
+  ['bst','bst-l'].forEach(id=>{
+    const b=q(id);if(!b)return;
     b.textContent=S.run?'STOP':'START';
     b.style.background=S.run?'var(--red)':'#00c853';
     b.style.color=S.run?'#fff':'#000';
   });
 }
-function syncTimer(){
-  const n=Math.ceil((S.sec+1)/60)*60;
-  S.sec=n>600?60:n; updateUI();
-}
-function adjTime(v){ S.sec=Math.max(0,Math.min(600,S.sec+v)); updateUI(); }
+function syncTimer(){const n=Math.ceil((S.sec+1)/60)*60;S.sec=n>600?60:n;updateUI();}
+function adjTime(v){S.sec=Math.max(0,Math.min(600,S.sec+v));updateUI();}
 
-/* ── STATUS CALC ────────────────────────────────── */
-function calcStatus(){
-  if(!S.pinSet||!S.rcSet||!S.run) return null;
+function calcSt(){
+  if(!S.pinSet||!S.rcSet||!S.run)return null;
   const dist=S.lat!=null?dtl(S.lat,S.lon):S._sd;
-  const appr=S.lat!=null?S.approachSpd:S._sa;
-  if(dist<-5) return{state:'OCS',dist,tLine:null,diff:null};
-  const tLine=appr>0.05?dist/appr:null;
-  if(tLine===null) return{state:'STOPPED',dist,tLine:null,diff:null};
-  const diff=tLine-S.sec;
-  return{state:Math.abs(diff)<=10?'ON TIME':diff<-10?'EARLY':'LATE',dist,tLine,diff};
+  const appr=S.lat!=null?S.apSpd:S._sa;
+  if(dist<-5)return{st:'OCS',dist,tL:null,df:null};
+  const tL=appr>.05?dist/appr:null;
+  if(!tL)return{st:'STOP',dist,tL:null,df:null};
+  const df=tL-S.sec;
+  return{st:Math.abs(df)<=10?'OK':df<-10?'EARLY':'LATE',dist,tL,df};
 }
 
-/* ── SIDE SELECT ────────────────────────────────── */
 function selectSide(side){
-  S.active=side;
-  const hdg=Math.round(S.hdg);
+  S.act=side;const h=Math.round(S.hdg);
   if(side==='port'){
-    S.portRef=hdg;
-    ['val-port','val-port-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=hdg+'°';});
-    ['sub-port','sub-port-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='REF SET';});
-  } else {
-    S.stbdRef=hdg;
-    ['val-stbd','val-stbd-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=hdg+'°';});
-    ['sub-stbd','sub-stbd-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='REF SET';});
+    S.portRef=h;
+    ['vp','vp-l'].forEach(id=>$t(id,h+'°'));
+    ['sbp','sbp-l'].forEach(id=>$t(id,'REF SET'));
+  }else{
+    S.stbdRef=h;
+    ['vs','vs-l'].forEach(id=>$t(id,h+'°'));
+    ['sbs','sbs-l'].forEach(id=>$t(id,'REF SET'));
   }
-  ['card-port','card-port-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('active',side==='port');});
-  ['card-stbd','card-stbd-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('active',side==='stbd');});
+  ['cp','cp-l'].forEach(id=>{const e=q(id);if(e)e.classList.toggle('act',side==='port');});
+  ['cs','cs-l'].forEach(id=>{const e=q(id);if(e)e.classList.toggle('act',side==='stbd');});
   updateUI();
 }
 
-/* ── NAVIGATION ─────────────────────────────────── */
-function goTac(){
-  document.getElementById('s1').classList.add('off');
-  document.getElementById('s2').classList.remove('off');
-}
-function goPreStart(){
-  document.getElementById('s2').classList.add('off');
-  document.getElementById('s1').classList.remove('off');
-}
+function goTac(){q('s1').classList.add('off');q('s2').classList.remove('off');}
+function goPreStart(){q('s2').classList.add('off');q('s1').classList.remove('off');}
+
 function triggerGo(){
-  if(S.transitioned) return; S.transitioned=true;
-  const ov=document.getElementById('go-overlay');
-  const nEl=document.getElementById('go-num');
-  const gEl=document.getElementById('go-word');
-  ov.classList.add('visible');
-  let c=3; nEl.textContent=c;
+  if(S.trans)return;S.trans=true;
+  const ov=q('cov'),nEl=q('cn'),gEl=q('cg');
+  ov.classList.add('vis');let c=3;nEl.textContent=c;
   const t=setInterval(()=>{
-    c--;
-    if(c>0){nEl.textContent=c;}
+    c--;if(c>0){nEl.textContent=c;}
     else{
-      clearInterval(t); nEl.style.display='none'; gEl.style.display='block';
+      clearInterval(t);nEl.style.display='none';gEl.style.display='block';
       setTimeout(()=>{
-        ov.classList.remove('visible');
-        document.getElementById('go-strip').classList.add('show');
+        ov.classList.remove('vis');
+        q('gos').classList.add('show');
         goTac();
-        setTimeout(()=>document.getElementById('go-strip').classList.remove('show'),3500);
+        setTimeout(()=>q('gos').classList.remove('show'),3500);
       },800);
     }
   },900);
 }
+
 function resetAll(){
   S.sec=300;S.run=false;S.pinSet=false;S.rcSet=false;
-  S.portRef=null;S.stbdRef=null;S.active=null;S.transitioned=false;
-  S._sd=65;S._sa=0.45;S.approachSpd=0;
-  ['btn-pin','btn-pin-ls','btn-rc','btn-rc-ls'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('marked');});
-  ['pin-st','pin-st-ls'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='TAP TO SET';});
-  ['rc-st','rc-st-ls'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='TAP TO SET';});
-  ['btn-start','btn-start-ls'].forEach(id=>{
-    const b=document.getElementById(id);if(!b)return;
+  S.portRef=null;S.stbdRef=null;S.act=null;S.trans=false;
+  S._sd=65;S._sa=.45;S.apSpd=0;
+  ['bp','bp-l','br','br-l'].forEach(id=>{const e=q(id);if(e)e.classList.remove('mk');});
+  ['ps','ps-l'].forEach(id=>$t(id,'TAP'));
+  ['rs','rs-l'].forEach(id=>$t(id,'TAP'));
+  ['bst','bst-l'].forEach(id=>{
+    const b=q(id);if(!b)return;
     b.textContent='START';b.style.background='#00c853';b.style.color='#000';
   });
-  ['val-port','val-port-l','val-stbd','val-stbd-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='---°';});
-  ['sub-port','sub-port-l','sub-stbd','sub-stbd-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='TAP TO SET';});
-  ['card-port','card-port-l','card-stbd','card-stbd-l'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('active','favored');});
-  document.getElementById('go-num').style.display='block';
-  document.getElementById('go-word').style.display='none';
-  document.getElementById('go-strip').classList.remove('show');
-  document.getElementById('sem-bg').style.cssText='opacity:0';
-  // reset status word
-  const sw=document.getElementById('status-word');
-  if(sw){sw.textContent='——';sw.className='';}
-  const swl=document.getElementById('status-word-ls');
-  if(swl){swl.textContent='——';swl.style.color='var(--muted)';}
-  goPreStart(); updateUI();
+  ['vp','vp-l','vs','vs-l'].forEach(id=>$t(id,'---°'));
+  ['sbp','sbp-l','sbs','sbs-l'].forEach(id=>$t(id,'TAP TO SET'));
+  ['cp','cp-l','cs','cs-l'].forEach(id=>{const e=q(id);if(e)e.classList.remove('act','fav');});
+  q('cn').style.display='block';q('cg').style.display='none';
+  q('gos').classList.remove('show');
+  q('sem').style.cssText='opacity:0';
+  const sw=q('sw');if(sw){sw.textContent='——';sw.className='';}
+  const sl=q('sw-l');if(sl){sl.textContent='——';sl.style.color='var(--mut)';}
+  goPreStart();updateUI();
 }
 
-/* ── HELPERS ────────────────────────────────────── */
-function $set(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
-function $style(id,p,v){const el=document.getElementById(id);if(el)el.style[p]=v;}
+const q=id=>document.getElementById(id);
+function $t(id,v){const e=q(id);if(e)e.textContent=v;}
+function $s(id,p,v){const e=q(id);if(e)e.style[p]=v;}
 
-/* ── UI UPDATE ──────────────────────────────────── */
 function updateUI(){
   // Timer
   const m=Math.floor(S.sec/60),s=S.sec%60;
   const ts=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  const cls=S.sec<=30&&S.run?'danger':S.sec<=90&&S.run?'warn':'';
-  ['timer','timer-ls'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.textContent=ts;el.className=cls;});
+  const tc=S.sec<=30&&S.run?'danger':S.sec<=90&&S.run?'warn':'';
+  ['timer','timer-l'].forEach(id=>{const e=q(id);if(!e)return;e.textContent=ts;e.className=tc;});
 
-  // Speed
-  const spdStr=S.spd.toFixed(1);
-  ['speed-val','speed-val-ls','tac-spd','tac-spd-l'].forEach(id=>$set(id,spdStr));
-  const ap=S.lat!=null?S.approachSpd:S._sa;
-  const arrTxt=ap>0.3?'▲':ap<-0.1?'▼':'→';
-  const arrCol=ap>0.3?'var(--green)':ap<-0.1?'var(--red)':'#333';
-  ['approach-arrow','approach-arrow-ls'].forEach(id=>{$set(id,arrTxt);$style(id,'color',arrCol);});
+  // SOG
+  const sp=S.spd.toFixed(1);
+  ['sv','sv-l','ts','ts-l'].forEach(id=>$t(id,sp));
+  const ap=S.lat!=null?S.apSpd:S._sa;
+  const at=ap>.3?'▲':ap<-.1?'▼':'→';
+  const ac=ap>.3?'var(--green)':ap<-.1?'var(--red)':'#2a2a2a';
+  ['arr','arr-l'].forEach(id=>{$t(id,at);$s(id,'color',ac);});
 
   // Status
-  const st=calcStatus();
-  const sem=document.getElementById('sem-bg');
+  const st=calcSt();
+  const sem=q('sem');
 
-  const applyStatus=(wordId,detailId,etaId,isLS)=>{
-    const sw=document.getElementById(wordId);
-    if(!sw) return;
+  function apSt(wId,dId,eId,isL){
+    const sw=q(wId);if(!sw)return;
     if(!st){
-      if(isLS){sw.textContent='——';sw.style.color='var(--muted)';}
-      else{sw.textContent='——';sw.className='';}
-      $set(detailId,'SET PIN & RC TO CALCULATE'); $set(etaId,'');
-      sem.style.cssText='opacity:0'; return;
+      sw.textContent='——';
+      isL?sw.style.color='var(--mut)':sw.className='';
+      $t(dId,'SET PIN & RC TO CALCULATE');$t(eId,'');
+      sem.style.cssText='opacity:0';return;
     }
-    let word,cls,semStyle,detail,eta='';
+    let w,c,sc='',ss='opacity:0',d='',e='';
     const abs=Math.round(Math.abs(st.dist??0));
-    if(st.state==='OCS'){
-      word='OCS!';cls='s-ocs';semStyle='background:var(--red);opacity:.35';
-      detail=`${abs}m OVER LINE`;
-    } else if(st.state==='EARLY'){
-      word='EARLY';cls='s-early';semStyle='background:var(--red);opacity:.18';
-      detail=`${Math.abs(Math.round(st.diff))}s BEFORE GUN — SLOW DOWN`;
-      eta=st.tLine!=null?`ETA LINE: ${Math.round(st.tLine)}s`:'';
-    } else if(st.state==='ON TIME'){
-      word='ON TIME';cls='s-ok';semStyle='background:var(--green);opacity:.15';
-      detail='PERFECT APPROACH';
-      eta=st.tLine!=null?`ETA LINE: ${Math.round(st.tLine)}s`:'';
-    } else if(st.state==='LATE'){
-      word='LATE';cls='s-late';semStyle='background:var(--orange);opacity:.18';
-      detail=`${Math.abs(Math.round(st.diff))}s AFTER GUN — SPEED UP`;
-      eta=st.tLine!=null?`ETA LINE: ${Math.round(st.tLine)}s`:'';
-    } else {
-      word='——';cls='';semStyle='opacity:0';detail='HOLD SPEED';
-    }
-    if(isLS){sw.textContent=word;sw.style.color=cls==='s-ok'?'var(--green)':cls==='s-early'||cls==='s-ocs'?'var(--red)':cls==='s-late'?'var(--orange)':'var(--muted)';}
-    else{sw.textContent=word;sw.className=cls;}
-    $set(detailId,detail); $set(etaId,eta);
-    sem.style.cssText=semStyle;
-  };
-  applyStatus('status-word','status-detail','eta-line',false);
-  applyStatus('status-word-ls','status-detail-ls','eta-line-ls',true);
+    if(st.st==='OCS'){w='OCS!';c='var(--red)';sc='ocs';ss='background:var(--red);opacity:.35';d=`${abs}m OVER LINE`;}
+    else if(st.st==='EARLY'){w='EARLY';c='var(--red)';sc='ear';ss='background:var(--red);opacity:.18';d=`${Math.abs(Math.round(st.df))}s BEFORE GUN — SLOW`;e=st.tL?`ETA ${Math.round(st.tL)}s`:''}
+    else if(st.st==='OK'){w='ON TIME';c='var(--green)';sc='ok';ss='background:var(--green);opacity:.15';d='PERFECT APPROACH';e=st.tL?`ETA ${Math.round(st.tL)}s`:''}
+    else if(st.st==='LATE'){w='LATE';c='var(--ora)';sc='lat';ss='background:var(--ora);opacity:.18';d=`${Math.abs(Math.round(st.df))}s AFTER GUN — SPEED UP`;e=st.tL?`ETA ${Math.round(st.tL)}s`:''}
+    else{w='——';c='var(--mut)';}
+    sw.textContent=w;
+    isL?sw.style.color=c:sw.className=sc;
+    $t(dId,d);$t(eId,e);sem.style.cssText=ss;
+  }
+  apSt('sw','sd','el',false);
+  apSt('sw-l','sd-l','el-l',true);
 
   // Distance
-  const applyDist=(valId,sideId)=>{
-    const dv=document.getElementById(valId),ds=document.getElementById(sideId);
-    if(!dv||!ds) return;
-    if(!st||st.dist==null){dv.textContent='--';dv.style.color='#444';ds.textContent='';return;}
-    const abs=Math.round(Math.abs(st.dist));
-    dv.textContent=abs;
+  function apDist(vId,sId){
+    const dv=q(vId),ds=q(sId);if(!dv||!ds)return;
+    if(!st||st.dist==null){dv.textContent='--';dv.style.color='#333';ds.textContent='';return;}
+    const abs=Math.round(Math.abs(st.dist));dv.textContent=abs;
     if(st.dist<-5){dv.style.color='var(--red)';ds.textContent='⚠ OCS';ds.style.color='var(--red)';}
     else if(abs<=5){dv.style.color='var(--green)';ds.textContent='ON LINE';ds.style.color='var(--green)';}
-    else{dv.style.color='var(--white)';ds.textContent=st.dist>0?'BELOW':'OVER';ds.style.color='#666';}
-  };
-  applyDist('dist-val','dist-side');
-  applyDist('dist-val-ls','dist-side-ls');
+    else{dv.style.color='#fff';ds.textContent=st.dist>0?'BELOW':'OVER';ds.style.color='#444';}
+  }
+  apDist('dv','ds');apDist('dv-l','ds-l');
 
   // Heading
-  const hdgStr=String(Math.round(S.hdg)).padStart(3,'0')+'°';
-  $set('tac-heading',hdgStr); $set('tac-heading-l',hdgStr);
+  const hs=String(Math.round(S.hdg)).padStart(3,'0')+'°';
+  $t('hd',hs);$t('hd-l',hs);
 
-  // Shift — correct tack-aware logic
-  const ref=S.active==='port'?S.portRef:S.stbdRef;
-  const applyShift=(numId,arrId,portCardId,stbdCardId,portSubId,stbdSubId)=>{
-    if(ref===null) return;
+  // Shift
+  const ref=S.act==='port'?S.portRef:S.stbdRef;
+  function apShift(nId,aId,cpId,csId,spId,ssId){
+    if(ref===null)return;
     let d=Math.round(S.hdg-ref);
-    if(d>180)d-=360; if(d<-180)d+=360;
-    const sn=document.getElementById(numId),sa=document.getElementById(arrId);
-
-    // TACK-AWARE SHIFT:
-    // PORT:  d>0 → headed (NEGADO) red | d<0 → lifted (PRESTADO) green
-    // STBD:  d<0 → headed (NEGADO) red | d>0 → lifted (PRESTADO) green
-    let isLifted,isHeaded;
-    if(S.active==='port'){ isHeaded=d>0; isLifted=d<0; }
-    else                  { isHeaded=d<0; isLifted=d>0; }
-
-    const col=isLifted?'var(--green)':isHeaded?'var(--red)':'var(--white)';
-    // Arrows: LIFTED = up ▲, HEADED = down ▼
-    const arr=isLifted?'▲':isHeaded?'▼':'→';
-
+    if(d>180)d-=360;if(d<-180)d+=360;
+    let iL,iH;
+    if(S.act==='port'){iH=d>0;iL=d<0;}else{iH=d<0;iL=d>0;}
+    const col=iL?'var(--green)':iH?'var(--red)':'#fff';
+    const arw=iL?'▲':iH?'▼':'→';
+    const sn=q(nId),sa=q(aId);
     if(sn){sn.textContent=Math.abs(d);sn.style.color=col;}
-    if(sa){sa.textContent=arr;sa.style.color=col;}
-
-    const label=isLifted?'PRESTADO':isHeaded?'NEGADO':'IGUAL';
-    const pSub=document.getElementById(portSubId),sSub=document.getElementById(stbdSubId);
-    if(pSub&&S.active==='port') pSub.textContent=label;
-    if(sSub&&S.active==='stbd') sSub.textContent=label;
-
-    const portFav=S.portRef!==null&&S.active!=='port'&&d<0;
-    const stbdFav=S.stbdRef!==null&&S.active!=='stbd'&&d>0;
-    const pc=document.getElementById(portCardId),sc=document.getElementById(stbdCardId);
-    if(pc)pc.classList.toggle('favored',portFav);
-    if(sc)sc.classList.toggle('favored',stbdFav);
-  };
-  applyShift('shift-num','shift-arrow','card-port','card-stbd','sub-port','sub-stbd');
-  applyShift('shift-num-l','shift-arrow-l','card-port-l','card-stbd-l','sub-port-l','sub-stbd-l');
+    if(sa){sa.textContent=arw;sa.style.color=col;}
+    const lbl=iL?'PRESTADO':iH?'NEGADO':'IGUAL';
+    const pb=q(spId),sb=q(ssId);
+    if(pb&&S.act==='port')pb.textContent=lbl;
+    if(sb&&S.act==='stbd')sb.textContent=lbl;
+    const pF=S.portRef!==null&&S.act!=='port'&&d<0;
+    const sF=S.stbdRef!==null&&S.act!=='stbd'&&d>0;
+    const cp=q(cpId),cs=q(csId);
+    if(cp)cp.classList.toggle('fav',pF);
+    if(cs)cs.classList.toggle('fav',sF);
+  }
+  apShift('shn','sha','cp','cs','sbp','sbs');
+  apShift('shn-l','sha-l','cp-l','cs-l','sbp-l','sbs-l');
 }
 
-/* ── SIMULATION ─────────────────────────────────── */
 setInterval(()=>{
-  if(S.run&&S.sec>0){S.sec--;if(S.sec===0&&!S.transitioned)triggerGo();}
+  if(S.run&&S.sec>0){S.sec--;if(S.sec===0&&!S.trans)triggerGo();}
   if(S.lat==null){
     S._sh=((S._sh??45)+(Math.random()-.48)*2+360)%360;
-    S.hdg=S._sh; S.spd=5.0+Math.random()*.8;
-    if(S.pinSet&&S.rcSet&&S.run){S._sa=0.4+Math.random()*.2;S._sd=Math.max(-15,S._sd-S._sa);}
+    S.hdg=S._sh;S.spd=5.0+Math.random()*.8;
+    if(S.pinSet&&S.rcSet&&S.run){S._sa=.4+Math.random()*.2;S._sd=Math.max(-15,S._sd-S._sa);}
   }
   updateUI();
 },1000);
 
-startGPS();
-updateUI();
+startGPS();updateUI();
 
-/* ── WAKE LOCK ──────────────────────────────────── */
-let wakeLock=null;
-async function requestWakeLock(){
-  try{ if('wakeLock' in navigator){ wakeLock=await navigator.wakeLock.request('screen'); } }catch(e){}
-}
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') requestWakeLock(); });
-requestWakeLock();
+// Wake Lock
+(async()=>{try{if('wakeLock' in navigator)await navigator.wakeLock.request('screen');}catch(e){}})();
+document.addEventListener('visibilitychange',async()=>{
+  if(document.visibilityState==='visible')try{await navigator.wakeLock.request('screen');}catch(e){}
+});
 
-/* ── ORIENTATION UNLOCK ─────────────────────────── */
-async function unlockOrientation(){
-  try{ if(screen.orientation&&screen.orientation.unlock) await screen.orientation.unlock(); }catch(e){}
-}
-unlockOrientation();
+// Orientation unlock
+(async()=>{try{if(screen.orientation?.unlock)await screen.orientation.unlock();}catch(e){}})();
 
-/* ── SERVICE WORKER ─────────────────────────────── */
-if('serviceWorker' in navigator){
+// SW
+if('serviceWorker' in navigator)
   window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-}
 </script>
 </body>
 </html>
